@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ResumeAI — Smart Resume Analyzer</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink: #0f0e0d;
+    --ink-muted: #5a574f;
+    --ink-light: #9b9890;
+    --paper: #faf8f4;
+    --paper-warm: #f2ede4;
+    --paper-card: #fff;
+    --accent: #c84b2f;
+    --accent-light: #f5e8e4;
+    --green: #2a6b42;
+    --green-light: #e4f0e9;
+    --amber: #8c6000;
+    --amber-light: #fdf3d8;
+    --border: #e0dbd0;
+    --shadow: 0 2px 16px rgba(15,14,13,0.07);
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    min-height: 100vh;
+    font-size: 16px;
+    line-height: 1.6;
+  }
+
+  /* Header */
+  header {
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+    background: var(--paper);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .logo {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px;
+    letter-spacing: -0.5px;
+    color: var(--ink);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .logo-dot {
+    width: 8px; height: 8px;
+    background: var(--accent);
+    border-radius: 50%;
+    display: inline-block;
+  }
+  .header-tag {
+    font-size: 12px;
+    color: var(--ink-light);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+
+  /* Layout */
+  .main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 3rem 2rem 6rem;
+  }
+
+  .hero {
+    text-align: center;
+    margin-bottom: 3.5rem;
+    animation: fadeUp 0.6s ease both;
+  }
+  .hero-eyebrow {
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 600;
+    margin-bottom: 1rem;
+  }
+  .hero h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(32px, 5vw, 52px);
+    line-height: 1.15;
+    color: var(--ink);
+    margin-bottom: 1rem;
+    letter-spacing: -1px;
+  }
+  .hero h1 em {
+    font-style: italic;
+    color: var(--accent);
+  }
+  .hero p {
+    font-size: 17px;
+    color: var(--ink-muted);
+    max-width: 520px;
+    margin: 0 auto;
+    font-weight: 300;
+  }
+
+  /* Form Card */
+  .form-card {
+    background: var(--paper-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2.5rem;
+    box-shadow: var(--shadow);
+    animation: fadeUp 0.7s ease 0.1s both;
+  }
+
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+  }
+
+  @media (max-width: 720px) {
+    .two-col { grid-template-columns: 1fr; }
+  }
+
+  .field-group { display: flex; flex-direction: column; gap: 8px; }
+
+  label {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+  }
+
+  textarea, input[type="file"] {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: var(--ink);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    background: var(--paper);
+    transition: border-color 0.2s, box-shadow 0.2s;
+    resize: vertical;
+    width: 100%;
+  }
+  textarea:focus {
+    outline: none;
+    border-color: var(--ink);
+    box-shadow: 0 0 0 3px rgba(15,14,13,0.06);
+  }
+
+  .divider-or {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 14px 0;
+    color: var(--ink-light);
+    font-size: 12px;
+    font-weight: 500;
+  }
+  .divider-or::before, .divider-or::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .upload-zone {
+    border: 1.5px dashed var(--border);
+    border-radius: 10px;
+    padding: 24px 16px;
+    text-align: center;
+    background: var(--paper);
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    position: relative;
+  }
+  .upload-zone:hover { border-color: var(--ink-muted); background: var(--paper-warm); }
+  .upload-zone input[type="file"] {
+    position: absolute; inset: 0; opacity: 0; cursor: pointer; border: none; padding: 0;
+  }
+  .upload-icon { font-size: 28px; margin-bottom: 8px; }
+  .upload-zone p { font-size: 13px; color: var(--ink-muted); line-height: 1.4; }
+  .upload-zone strong { color: var(--ink); }
+
+  .form-footer {
+    margin-top: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .hint { font-size: 13px; color: var(--ink-light); }
+
+  .btn-analyze {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    background: var(--ink);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 14px 32px;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 180px;
+    justify-content: center;
+  }
+  .btn-analyze:hover { background: var(--accent); }
+  .btn-analyze:active { transform: scale(0.98); }
+  .btn-analyze:disabled { background: var(--ink-light); cursor: not-allowed; }
+
+  /* Spinner */
+  .spinner {
+    width: 18px; height: 18px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    display: none;
+  }
+  .loading .spinner { display: block; }
+  .loading .btn-text { display: none; }
+
+  /* Results */
+  #results {
+    display: none;
+    margin-top: 3rem;
+    animation: fadeUp 0.6s ease both;
+  }
+
+  .results-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  .results-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 28px;
+    letter-spacing: -0.5px;
+  }
+
+  /* Score Ring */
+  .score-block {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
+  .score-ring {
+    position: relative;
+    width: 80px;
+    height: 80px;
+  }
+  .score-ring svg {
+    transform: rotate(-90deg);
+  }
+  .score-ring .bg-ring { stroke: var(--paper-warm); }
+  .score-ring .fg-ring {
+    stroke-dasharray: 220;
+    stroke-dashoffset: 220;
+    transition: stroke-dashoffset 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+    stroke-linecap: round;
+  }
+  .score-number {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px;
+    color: var(--ink);
+  }
+  .verdict-pill {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    padding: 4px 14px;
+    border-radius: 20px;
+    text-transform: uppercase;
+  }
+
+  /* Result Sections */
+  .results-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+    margin-bottom: 1.25rem;
+  }
+  @media (max-width: 720px) {
+    .results-grid { grid-template-columns: 1fr; }
+  }
+
+  .result-card {
+    background: var(--paper-card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.5rem;
+    box-shadow: var(--shadow);
+  }
+  .result-card.full { grid-column: 1 / -1; }
+
+  .card-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card-label .dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .summary-text {
+    font-size: 15px;
+    color: var(--ink-muted);
+    line-height: 1.7;
+    font-weight: 300;
+  }
+
+  /* Item lists */
+  .item-list { display: flex; flex-direction: column; gap: 12px; }
+  .item {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  .item-icon {
+    width: 28px; height: 28px;
+    border-radius: 7px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .item-content .item-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 2px;
+  }
+  .item-content .item-detail {
+    font-size: 13px;
+    color: var(--ink-muted);
+    line-height: 1.5;
+  }
+
+  /* Keywords */
+  .keyword-cloud { display: flex; flex-wrap: wrap; gap: 8px; }
+  .kw-tag {
+    font-size: 12px;
+    font-weight: 500;
+    padding: 4px 12px;
+    border-radius: 20px;
+  }
+  .kw-match { background: var(--green-light); color: var(--green); }
+  .kw-miss { background: var(--accent-light); color: var(--accent); }
+
+  /* Error */
+  .error-box {
+    background: var(--accent-light);
+    border: 1px solid #f0c0b4;
+    border-radius: 10px;
+    padding: 14px 18px;
+    font-size: 14px;
+    color: var(--accent);
+    margin-top: 1rem;
+    display: none;
+  }
+
+  /* Animations */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .file-name-display {
+    font-size: 12px;
+    color: var(--green);
+    margin-top: 8px;
+    font-weight: 500;
+    display: none;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <span class="logo-dot"></span>
+    ResumeAI
+  </div>
+  <span class="header-tag">Powered by Claude</span>
+</header>
+
+<main class="main">
+
+  <div class="hero">
+    <p class="hero-eyebrow">AI-Powered Analysis</p>
+    <h1>Does your resume<br><em>actually</em> fit the job?</h1>
+    <p>Paste your resume and job description. Get an instant match score, gap analysis, and actionable suggestions.</p>
+  </div>
+
+  <div class="form-card">
+    <form id="analyzeForm">
+      <div class="two-col">
+
+        <!-- Resume Column -->
+        <div class="field-group">
+          <label>Your Resume</label>
+          <textarea id="resumeText" name="resume_text" rows="10"
+            placeholder="Paste your resume text here...
+
+Education, experience, skills — everything is fine as plain text."></textarea>
+
+          <div class="divider-or">or upload PDF</div>
+
+          <div class="upload-zone" id="uploadZone">
+            <input type="file" name="resume_pdf" id="resumePdf" accept=".pdf" onchange="handleFileChange(this)">
+            <div class="upload-icon">📄</div>
+            <p><strong>Click to upload</strong> your resume PDF<br>
+            <span style="font-size:12px; color: var(--ink-light);">PDF files only · Max 5MB</span></p>
+          </div>
+          <div class="file-name-display" id="fileNameDisplay"></div>
+        </div>
+
+        <!-- JD Column -->
+        <div class="field-group">
+          <label>Job Description</label>
+          <textarea id="jobDescription" name="job_description" rows="15"
+            placeholder="Paste the full job description here...
+
+Include required skills, responsibilities, and qualifications for the best analysis."></textarea>
+        </div>
+
+      </div>
+
+      <div class="form-footer">
+        <p class="hint">Analysis takes 10–20 seconds</p>
+        <button type="submit" class="btn-analyze" id="analyzeBtn">
+          <span class="btn-text">Analyze Match</span>
+          <span class="spinner"></span>
+          <svg class="btn-arrow" width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M3 8h10M9 4l4 4-4 4" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+    </form>
+
+    <div class="error-box" id="errorBox"></div>
+  </div>
+
+  <!-- Results Section -->
+  <div id="results">
+    <div class="results-header">
+      <h2 class="results-title">Your Analysis Results</h2>
+      <div class="score-block">
+        <div class="score-ring">
+          <svg width="80" height="80" viewBox="0 0 80 80">
+            <circle class="bg-ring" cx="40" cy="40" r="35" fill="none" stroke-width="7"/>
+            <circle class="fg-ring" id="scoreRing" cx="40" cy="40" r="35" fill="none" stroke-width="7" stroke="#c84b2f"/>
+          </svg>
+          <div class="score-number" id="scoreNumber">0</div>
+        </div>
+        <span class="verdict-pill" id="verdictPill">—</span>
+      </div>
+    </div>
+
+    <div class="results-grid">
+
+      <!-- Summary -->
+      <div class="result-card full">
+        <div class="card-label">
+          <span class="dot" style="background:#c84b2f"></span>
+          Overall Summary
+        </div>
+        <p class="summary-text" id="summaryText"></p>
+      </div>
+
+      <!-- Strengths -->
+      <div class="result-card">
+        <div class="card-label" style="color: var(--green)">
+          <span class="dot" style="background: var(--green)"></span>
+          Strengths
+        </div>
+        <div class="item-list" id="strengthsList"></div>
+      </div>
+
+      <!-- Gaps -->
+      <div class="result-card">
+        <div class="card-label" style="color: var(--accent)">
+          <span class="dot" style="background: var(--accent)"></span>
+          Gaps & Missing Items
+        </div>
+        <div class="item-list" id="gapsList"></div>
+      </div>
+
+      <!-- Suggestions -->
+      <div class="result-card full">
+        <div class="card-label" style="color: var(--amber)">
+          <span class="dot" style="background: var(--amber)"></span>
+          Actionable Suggestions
+        </div>
+        <div class="item-list" id="suggestionsList"></div>
+      </div>
+
+      <!-- Keywords -->
+      <div class="result-card">
+        <div class="card-label" style="color: var(--green)">
+          <span class="dot" style="background: var(--green)"></span>
+          Keywords Found ✓
+        </div>
+        <div class="keyword-cloud" id="keywordsMatched"></div>
+      </div>
+
+      <div class="result-card">
+        <div class="card-label" style="color: var(--accent)">
+          <span class="dot" style="background: var(--accent)"></span>
+          Keywords Missing ✗
+        </div>
+        <div class="keyword-cloud" id="keywordsMissing"></div>
+      </div>
+
+    </div>
+  </div>
+
+</main>
+
+<script>
+function handleFileChange(input) {
+  const display = document.getElementById('fileNameDisplay');
+  if (input.files[0]) {
+    display.textContent = '✓ ' + input.files[0].name;
+    display.style.display = 'block';
+    document.getElementById('resumeText').value = '';
+  }
+}
+
+document.getElementById('analyzeForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+
+  const btn = document.getElementById('analyzeBtn');
+  const errorBox = document.getElementById('errorBox');
+  const results = document.getElementById('results');
+
+  // Reset UI
+  errorBox.style.display = 'none';
+  results.style.display = 'none';
+  btn.disabled = true;
+  btn.classList.add('loading');
+  btn.querySelector('.btn-arrow').style.display = 'none';
+
+  const formData = new FormData(this);
+
+  try {
+    const res = await fetch('/analyze', { method: 'POST', body: formData });
+    const data = await res.json();
+
+    if (!res.ok || data.error) {
+      throw new Error(data.error || 'Something went wrong.');
+    }
+
+    renderResults(data);
+
+  } catch (err) {
+    errorBox.textContent = '⚠ ' + err.message;
+    errorBox.style.display = 'block';
+  } finally {
+    btn.disabled = false;
+    btn.classList.remove('loading');
+    btn.querySelector('.btn-arrow').style.display = 'block';
+  }
+});
+
+function renderResults(data) {
+  const results = document.getElementById('results');
+  results.style.display = 'block';
+
+  // Score
+  const score = data.match_score || 0;
+  const circumference = 2 * Math.PI * 35;
+  const offset = circumference - (score / 100) * circumference;
+  const ring = document.getElementById('scoreRing');
+  ring.style.strokeDasharray = circumference;
+
+  // Color based on score
+  const scoreColor = score >= 70 ? '#2a6b42' : score >= 45 ? '#8c6000' : '#c84b2f';
+  ring.style.stroke = scoreColor;
+
+  // Animate score
+  let current = 0;
+  const target = score;
+  const numEl = document.getElementById('scoreNumber');
+  const interval = setInterval(() => {
+    current = Math.min(current + 2, target);
+    numEl.textContent = current;
+    const currentOffset = circumference - (current / 100) * circumference;
+    ring.style.strokeDashoffset = currentOffset;
+    if (current >= target) clearInterval(interval);
+  }, 20);
+
+  // Verdict pill
+  const pill = document.getElementById('verdictPill');
+  pill.textContent = data.verdict || '—';
+  const pillColors = {
+    'Strong Match': { bg: '#e4f0e9', color: '#2a6b42' },
+    'Good Match':   { bg: '#e4f0e9', color: '#2a6b42' },
+    'Partial Match':{ bg: '#fdf3d8', color: '#8c6000' },
+    'Weak Match':   { bg: '#f5e8e4', color: '#c84b2f' }
+  };
+  const pc = pillColors[data.verdict] || { bg: '#f0f0f0', color: '#666' };
+  pill.style.background = pc.bg;
+  pill.style.color = pc.color;
+
+  // Summary
+  document.getElementById('summaryText').textContent = data.summary || '';
+
+  // Build item list helper
+  function buildItems(containerId, items, iconEmoji, iconBg, iconColor) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = '';
+    (items || []).forEach(item => {
+      container.innerHTML += `
+        <div class="item">
+          <div class="item-icon" style="background:${iconBg}; color:${iconColor}">${iconEmoji}</div>
+          <div class="item-content">
+            <div class="item-title">${item.point}</div>
+            <div class="item-detail">${item.detail}</div>
+          </div>
+        </div>`;
+    });
+  }
+
+  buildItems('strengthsList', data.strengths, '✓', '#e4f0e9', '#2a6b42');
+  buildItems('gapsList', data.gaps, '✗', '#f5e8e4', '#c84b2f');
+  buildItems('suggestionsList', data.suggestions, '→', '#fdf3d8', '#8c6000');
+
+  // Keywords
+  function buildKeywords(containerId, keywords, cls) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = '';
+    (keywords || []).forEach(kw => {
+      container.innerHTML += `<span class="kw-tag ${cls}">${kw}</span>`;
+    });
+    if (!keywords || keywords.length === 0) {
+      container.innerHTML = '<span style="font-size:13px; color: var(--ink-light)">None found</span>';
+    }
+  }
+
+  buildKeywords('keywordsMatched', data.keywords_matched, 'kw-match');
+  buildKeywords('keywordsMissing', data.keywords_missing, 'kw-miss');
+
+  results.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+</script>
+
+</body>
+</html>
