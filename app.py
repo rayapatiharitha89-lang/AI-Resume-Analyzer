@@ -8,7 +8,7 @@ import io
 app = Flask(__name__)
 
 # API Key hardcoded directly - replace with your latest key
-API_KEY = "AIzaSyCsZdPPrPxseQSVVvDBtwnMZO0mWwAJHPE"
+API_KEY = "AIzaSyARiN9wftC838oMxK6hUBdiJiXBc3bFF5o"
 
 client = genai.Client(api_key=API_KEY)
 
