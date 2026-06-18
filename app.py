@@ -1,14 +1,14 @@
 import os
 import json
 from flask import Flask, request, jsonify, render_template
-import google.generativeai as genai
+from google import genai
 import PyPDF2
 import io
 
 app = Flask(__name__)
 
-# API Key hardcoded directly - replace with your latest key
-API_KEY = "AIzaSyARiN9wftC838oMxK6hUBdiJiXBc3bFF5o"
+# API Key from environment variable
+API_KEY = os.environ.get("AIzaSyARiN9wftC838oMxK6hUBdiJiXBc3bFF5o")
 
 client = genai.Client(api_key=API_KEY)
 
