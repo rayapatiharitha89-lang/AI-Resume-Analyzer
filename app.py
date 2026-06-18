@@ -8,7 +8,7 @@ import io
 app = Flask(__name__)
 
 # API Key from environment variable
-API_KEY = os.environ.get("AIzaSyARiN9wftC838oMxK6hUBdiJiXBc3bFF5o")
+API_KEY = os.environ.get("GEMINI_API_KEY")
 
 client = genai.Client(api_key=API_KEY)
 
@@ -53,7 +53,7 @@ Provide exactly 3-4 items in each of strengths, gaps, and suggestions arrays.
 """
 
     response = client.models.generate_content(
-        model="gemini-3-flash-preview",
+        model="gemini-2.0-flash",
         contents=prompt
     )
 
@@ -99,6 +99,6 @@ def analyze():
     except Exception as e:
         return jsonify({"error": f"Unexpected error: {str(e)}"}), 500
 
-    if __name__ == '__main__':
-        port = int(os.environ.get("PORT", 5000))
+if __name__ == '__main__':
+    port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port, debug=False)
